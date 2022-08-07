@@ -4,6 +4,13 @@ import requests
 import time
 from datetime import datetime
 
+try : 
+    import telegram_send
+    useTG=True
+except Exception as err:
+    print(f"Impossible d'importer telegram_send : {err}")
+    useTG=False
+    
 #Code créé par Moutonneux : https://github.com/titouannwtt/bot-sniping-kucoin/
 #Pensez à utiliser mon lien d'affiliation lors de votre inscription sur Kucoin : 
 #https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T    <-----   ou directement code parainage : rPMCW4T
@@ -74,7 +81,10 @@ kucoin.load_markets()
 
 #place_market_order("SOL-USDT", "buy", getSolde()/getCurrentPrice("SOL-USDT")*0.95)
 nbDePairesExecutionsPrecedentes=0
-print(f"{str(datetime.now()).split('.')[0]} | Bot de sniping lancé avec {getSolde()} USDT, en attente de nouvelles paires...")
+date=str(datetime.now()).split('.')[0]
+print(f"{date} | Bot de sniping lancé avec {getSolde()} USDT, en attente de nouvelles paires...")
+if useTG==True:
+    telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {date} :\n Lancement du bot avec un solde de {getSolde()} USDT."])
 while True :
     #Récupération des données de kucoin
     liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
@@ -97,6 +107,8 @@ while True :
                 symbol=pair
         if symbol in locals():
             print(f"{str(datetime.now()).split('.')[0]} | Tentative de snipping sur {symbol} avec {getSolde()} USDT")
+            if useTG==True:
+                telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {str(datetime.now()).split('.')[0]} :\n Tentative de snipping sur {symbol} avec {getSolde()} USDT"])
             amount = getSolde()/getCurrentPrice(perpSymbol)*0.95
             seconds_before_sell = 10
 
@@ -111,6 +123,8 @@ while True :
 
                     kucoin.place_market_order(symbol, "sell", amount)
                     print(f"{str(datetime.now()).split('.')[0]} | Sell Order success!")
+                    if useTG==True:
+                        telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {str(datetime.now()).split('.')[0]} :\n Sell Order success on {symbol}.\n`\nNouveau solde : {getSolde()} USDT"])
 
                     break
                 except Exception as err:

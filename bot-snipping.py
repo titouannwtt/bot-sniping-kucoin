@@ -8,6 +8,20 @@ from datetime import datetime
 #Pensez à utiliser mon lien d'affiliation lors de votre inscription sur Kucoin : 
 #https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T    <-----   ou directement code parainage : rPMCW4T
 
+#Ce template de bot de snipping vous est partagé gratuitement.
+#Son développement représente plusieurs heures de travail et tout a été commenté pour vous faciliter sa compréhension.
+#Vous pouvez me soutenir en utilisant mon lien d'affiliation Kucoin ( https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T ) ou FTX ( https://ftx.com/eu/profile#a=titouannwtt ),
+#Ou en me faisant des dons en crypto-monnaie :
+#Adresse BTC : 3GYhBgZMfgzqjYhVhc2w53oMcvZb4jfGfL
+#Adresse ETH (Réseau ERC20) : 0x43fC6F9B8b1CfBd83b52a1FD1de510effe0A49a7
+#(Même une petite somme me soutient énormement moralement :D)
+
+#Vous êtes autorisé à modifier ce code pour un usage personnel uniquement.
+#Vous êtes autorisé à partager ce code ou un extrait de ce code dans un cadre privé uniquement, à condition de me créditez en tant qu'auteur de façon explicite.
+#Vous n'êtes pas autorisé à vendre ou à tirer profit ce code, un extrait de ce code ou une modification de ce code.
+
+#====================================================================
+
 #Cette fonction permet d'obtenir le prix actuel d'une crypto sur Kucoin
 def getCurrentPrice(perpSymbol) :
     global kucoin

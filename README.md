@@ -1,0 +1,2 @@
+# bot-sniping-kucoin
+Bot de crypto-monnaie dédié au snipping de crypto-monnaie sur l'exchange Kucoin. Le snipping est une stratégie consistant à acheter une crypto-monnaie dès son listing (apparition) sur un exchange (en l'occurrence Kucoin qui liste beaucoup de crypto-monnaie avant tout le monde). Le bot va constamment regarder si une nouvelle crypto-monnaie apparait sur l'exchange, si c'est le cas, elle est automatiquement achetée et revendu quelques secondes plus tard.

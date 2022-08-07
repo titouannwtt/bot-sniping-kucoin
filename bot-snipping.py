@@ -1,12 +1,12 @@
 import ccxt
-import pandas_ta as pda
 import pandas as pd
 import requests
 import time
 from datetime import datetime
 
+#Code créé par Moutonneux : https://github.com/titouannwtt/bot-sniping-kucoin/
 #Pensez à utiliser mon lien d'affiliation lors de votre inscription sur Kucoin : 
-#https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T    <-----   Code parainage : rPMCW4T
+#https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T    <-----   ou directement code parainage : rPMCW4T
 
 #Cette fonction permet d'obtenir le prix actuel d'une crypto sur Kucoin
 def getCurrentPrice(perpSymbol) :

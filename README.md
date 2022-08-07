@@ -11,7 +11,7 @@ L'idée d'un bot de snipping est d'acheter une crypto-monnaie au moment de son a
 
 ## Code
 Le bot utilise l'API de la plateforme d'exchange [Kucoin](https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T) pour intéragir avec le marché des cryptos-monnaies.
-Il doit être executé en continue et va s'occuper lui-même de détecter les crypto-monnaies à acheter 
+Il doit être executé en continue et va s'occuper lui-même de détecter les crypto-monnaies à acheter et va gérer la quantité à acheter selon la quantité d'USDT sur votre compte
 
 # Remerciement :
 Ce code vous est partagé gratuitement, vous pouvez me remercier en utilisant un de mes liens d'affiliations :

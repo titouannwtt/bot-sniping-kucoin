@@ -87,7 +87,13 @@ if useTG==True:
     telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {date} :\n Lancement du bot avec un solde de {getSolde()} USDT."])
 while True :
     #Récupération des données de kucoin
-    liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
+    time.sleep(0.5)
+    try :
+        liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
+    except Exception as err :
+        time.sleep(30)
+        if "Max retries exceeded with url" in err :
+            print("Trop de requêtes envoyées, on patiente 30 secondes.")
     dataResponse = liste_pairs['data']
     df = pd.DataFrame(dataResponse, columns = ['symbol','enableTrading'])
     #df.drop(df.loc[df['enableTrading']==False].index, inplace=True)

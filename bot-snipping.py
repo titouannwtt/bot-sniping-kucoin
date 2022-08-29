@@ -4,30 +4,9 @@ import requests
 import time
 from datetime import datetime
 
-try : 
-    import telegram_send
-    useTG=True
-except Exception as err:
-    print(f"Impossible d'importer telegram_send : {err}")
-    useTG=False
-    
 #Code créé par Moutonneux : https://github.com/titouannwtt/bot-sniping-kucoin/
 #Pensez à utiliser mon lien d'affiliation lors de votre inscription sur Kucoin : 
 #https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T    <-----   ou directement code parainage : rPMCW4T
-
-#Ce template de bot de snipping vous est partagé gratuitement.
-#Son développement représente plusieurs heures de travail et tout a été commenté pour vous faciliter sa compréhension.
-#Vous pouvez me soutenir en utilisant mon lien d'affiliation Kucoin ( https://www.kucoin.com/ucenter/signup?rcode=rPMCW4T ) ou FTX ( https://ftx.com/eu/profile#a=titouannwtt ),
-#Ou en me faisant des dons en crypto-monnaie :
-#Adresse BTC : 3GYhBgZMfgzqjYhVhc2w53oMcvZb4jfGfL
-#Adresse ETH (Réseau ERC20) : 0x43fC6F9B8b1CfBd83b52a1FD1de510effe0A49a7
-#(Même une petite somme me soutient énormement moralement :D)
-
-#Vous êtes autorisé à modifier ce code pour un usage personnel uniquement.
-#Vous êtes autorisé à partager ce code ou un extrait de ce code dans un cadre privé uniquement, à condition de me créditez en tant qu'auteur de façon explicite.
-#Vous n'êtes pas autorisé à vendre ou à tirer profit ce code, un extrait de ce code ou une modification de ce code.
-
-#====================================================================
 
 #Cette fonction permet d'obtenir le prix actuel d'une crypto sur Kucoin
 def getCurrentPrice(perpSymbol) :
@@ -64,9 +43,9 @@ def getSolde():
         
 #Connexion à l'API
 kucoin = ccxt.kucoin({
-            "apiKey": "61ef8df5c14fd90001e7c239",
-            "secret": "caae6154-8a42-4e5c-b171-cde45dd2839c",
-            "password": "#########################"
+            "apiKey": "6305aafbd8c61b00019af3cf",
+            "secret": "f4c60b4e-e822-429f-8ca9-1d8e79794e4b",
+            "password": "4447190"
             })
 
 #Dans le cas où vos clés API seraient mauvaises, cette fonction renverrait une erreur
@@ -81,19 +60,10 @@ kucoin.load_markets()
 
 #place_market_order("SOL-USDT", "buy", getSolde()/getCurrentPrice("SOL-USDT")*0.95)
 nbDePairesExecutionsPrecedentes=0
-date=str(datetime.now()).split('.')[0]
-print(f"{date} | Bot de sniping lancé avec {getSolde()} USDT, en attente de nouvelles paires...")
-if useTG==True:
-    telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {date} :\n Lancement du bot avec un solde de {getSolde()} USDT."])
+print(f"{str(datetime.now()).split('.')[0]} | Bot de sniping lancé avec {getSolde()} USDT, en attente de nouvelles paires...")
 while True :
     #Récupération des données de kucoin
-    time.sleep(0.5)
-    try :
-        liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
-    except Exception as err :
-        time.sleep(30)
-        if "Max retries exceeded with url" in err :
-            print("Trop de requêtes envoyées, on patiente 30 secondes.")
+    liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
     dataResponse = liste_pairs['data']
     df = pd.DataFrame(dataResponse, columns = ['symbol','enableTrading'])
     #df.drop(df.loc[df['enableTrading']==False].index, inplace=True)
@@ -108,14 +78,13 @@ while True :
     if len(perpListBase) > nbDePairesExecutionsPrecedentes and nbDePairesExecutionsPrecedentes!=0:
         print(f"{str(datetime.now()).split('.')[0]} | Nouvelle paire disponible !!!")
         #On compare nos 2 listes pour récupérer le nom de la nouvelle paire
+        symbol=''
         for pair in perpListBase:
             if pair not in perpListEx :
                 symbol=pair
-        if symbol in locals():
+        if symbol != '' :
             print(f"{str(datetime.now()).split('.')[0]} | Tentative de snipping sur {symbol} avec {getSolde()} USDT")
-            if useTG==True:
-                telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {str(datetime.now()).split('.')[0]} :\n Tentative de snipping sur {symbol} avec {getSolde()} USDT"])
-            amount = getSolde()/getCurrentPrice(perpSymbol)*0.95
+            amount = getSolde()/getCurrentPrice(symbol)*0.95
             seconds_before_sell = 10
 
             while True:
@@ -129,8 +98,6 @@ while True :
 
                     kucoin.place_market_order(symbol, "sell", amount)
                     print(f"{str(datetime.now()).split('.')[0]} | Sell Order success!")
-                    if useTG==True:
-                        telegram_send.send(messages=[f"BOT-SNIPPING-KUCOIN - {str(datetime.now()).split('.')[0]} :\n Sell Order success on {symbol}.\n`\nNouveau solde : {getSolde()} USDT"])
 
                     break
                 except Exception as err:
@@ -144,7 +111,11 @@ while True :
             del symbol
         else :
             print(f"{str(datetime.now()).split('.')[0]} | Aucune paire n'est différente entre cette execution et l'execution précedente")
-        
+            print(f"symbol={symbol}")
+        #On sauvegarde ce nombre pour le vérifier juste après
+        nbDePairesExecutionsPrecedentes=len(perpListBase)
+        #On sauvegarde l'ancienne liste
+        perpListEx=perpListBase
     #Si le nombre de paires est toujours le même :
     else :
         #On sauvegarde ce nombre pour le vérifier juste après
@@ -154,5 +125,6 @@ while True :
         #Pour afficher un message toutes les heures dans la console:
         now = datetime.now()
         minute0=int(now.strftime("%M"))+int(now.strftime("%S"))
-        if minute0==0 :
-            print(f"{str(datetime.now()).split('.')[0]} | Bot-snip toujours en cours d'execution : Aucune nouvelle paire : {len(perpListBase)} paires disponibles")
+        if minute0==0:
+            #print(f"{str(datetime.now()).split('.')[0]} | Bot-snip toujours en cours d'execution : Aucune nouvelle paire : {len(perpListBase)} paires disponibles")
+            pass

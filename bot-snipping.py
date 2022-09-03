@@ -62,69 +62,75 @@ kucoin.load_markets()
 nbDePairesExecutionsPrecedentes=0
 print(f"{str(datetime.now()).split('.')[0]} | Bot de sniping lancé avec {getSolde()} USDT, en attente de nouvelles paires...")
 while True :
-    #Récupération des données de kucoin
-    liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
-    dataResponse = liste_pairs['data']
-    df = pd.DataFrame(dataResponse, columns = ['symbol','enableTrading'])
-    #df.drop(df.loc[df['enableTrading']==False].index, inplace=True)
-    df = df[df.symbol.str.contains("-USDT")]
+    try :
+        #Récupération des données de kucoin
+        liste_pairs = requests.get('https://openapi-v2.kucoin.com/api/v1/symbols').json()
+        dataResponse = liste_pairs['data']
+        df = pd.DataFrame(dataResponse, columns = ['symbol','enableTrading'])
+        #df.drop(df.loc[df['enableTrading']==False].index, inplace=True)
+        df = df[df.symbol.str.contains("-USDT")]
 
-    #On créer une liste avec le nom de paires
-    perpListBase = []
-    for index, row in df.iterrows():
-        perpListBase.append(row['symbol'])
-    #On vérifie que le nombre de paires de notre dernière execution est identique.
-    #Si une nouvelle paire existe
-    if len(perpListBase) > nbDePairesExecutionsPrecedentes and nbDePairesExecutionsPrecedentes!=0:
-        print(f"{str(datetime.now()).split('.')[0]} | Nouvelle paire disponible !!!")
-        #On compare nos 2 listes pour récupérer le nom de la nouvelle paire
-        symbol=''
-        for pair in perpListBase:
-            if pair not in perpListEx :
-                symbol=pair
-        if symbol != '' :
-            print(f"{str(datetime.now()).split('.')[0]} | Tentative de snipping sur {symbol} avec {getSolde()} USDT")
-            amount = getSolde()/getCurrentPrice(symbol)*0.95
-            seconds_before_sell = 10
+        #On créer une liste avec le nom de paires
+        perpListBase = []
+        for index, row in df.iterrows():
+            perpListBase.append(row['symbol'])
+        #On vérifie que le nombre de paires de notre dernière execution est identique.
+        #Si une nouvelle paire existe
+        if len(perpListBase) > nbDePairesExecutionsPrecedentes and nbDePairesExecutionsPrecedentes!=0:
+            print(f"{str(datetime.now()).split('.')[0]} | Nouvelle paire disponible !!!")
+            kucoin.load_markets()
+            #On compare nos 2 listes pour récupérer le nom de la nouvelle paire
+            symbol=''
+            for pair in perpListBase:
+                if pair not in perpListEx :
+                    symbol=pair
+            if symbol != '' :
+                print(f"{str(datetime.now()).split('.')[0]} | Tentative de snipping sur {symbol} avec {getSolde()} USDT")
+                amount = getSolde()/getCurrentPrice(symbol)*0.95
+                seconds_before_sell = 10
 
-            while True:
-                try:
-                    kucoin.reload_markets()
-                    kucoin.place_market_order(symbol, "buy", amount)
-                    print(f"{str(datetime.now()).split('.')[0]} | Buy Order success!")
+                while True:
+                    try:
+                        kucoin.reload_markets()
+                        kucoin.place_market_order(symbol, "buy", amount)
+                        print(f"{str(datetime.now()).split('.')[0]} | Buy Order success!")
 
-                    print(f"{str(datetime.now()).split('.')[0]} | Waiting for sell...")
-                    time.sleep(seconds_before_sell)
+                        print(f"{str(datetime.now()).split('.')[0]} | Waiting for sell...")
+                        time.sleep(seconds_before_sell)
 
-                    kucoin.place_market_order(symbol, "sell", amount)
-                    print(f"{str(datetime.now()).split('.')[0]} | Sell Order success!")
+                        kucoin.place_market_order(symbol, "sell", amount)
+                        print(f"{str(datetime.now()).split('.')[0]} | Sell Order success!")
 
-                    break
-                except Exception as err:
-                    print(err)
-                    if str(err) == "kucoin does not have market symbol " + symbol:
-                        time.sleep(0.1)
-                    else :
+                        break
+                    except Exception as err:
                         print(err)
-                    pass
-            print(f"{str(datetime.now()).split('.')[0]} | Sniping réalisé sur {symbol}")
-            del symbol
+                        if str(err) == "kucoin does not have market symbol " + symbol:
+                            time.sleep(0.1)
+                        else :
+                            print(err)
+                        pass
+                print(f"{str(datetime.now()).split('.')[0]} | Sniping réalisé sur {symbol}")
+                del symbol
+            else :
+                print(f"{str(datetime.now()).split('.')[0]} | Aucune paire n'est différente entre cette execution et l'execution précedente")
+                print(f"symbol={symbol}")
+            #On sauvegarde ce nombre pour le vérifier juste après
+            nbDePairesExecutionsPrecedentes=len(perpListBase)
+            #On sauvegarde l'ancienne liste
+            perpListEx=perpListBase
+        #Si le nombre de paires est toujours le même :
         else :
-            print(f"{str(datetime.now()).split('.')[0]} | Aucune paire n'est différente entre cette execution et l'execution précedente")
-            print(f"symbol={symbol}")
-        #On sauvegarde ce nombre pour le vérifier juste après
-        nbDePairesExecutionsPrecedentes=len(perpListBase)
-        #On sauvegarde l'ancienne liste
-        perpListEx=perpListBase
-    #Si le nombre de paires est toujours le même :
-    else :
-        #On sauvegarde ce nombre pour le vérifier juste après
-        nbDePairesExecutionsPrecedentes=len(perpListBase)
-        #On sauvegarde l'ancienne liste
-        perpListEx=perpListBase
-        #Pour afficher un message toutes les heures dans la console:
-        now = datetime.now()
-        minute0=int(now.strftime("%M"))+int(now.strftime("%S"))
-        if minute0==0:
-            #print(f"{str(datetime.now()).split('.')[0]} | Bot-snip toujours en cours d'execution : Aucune nouvelle paire : {len(perpListBase)} paires disponibles")
-            pass
+            #On sauvegarde ce nombre pour le vérifier juste après
+            nbDePairesExecutionsPrecedentes=len(perpListBase)
+            #On sauvegarde l'ancienne liste
+            perpListEx=perpListBase
+            #Pour afficher un message toutes les heures dans la console:
+            now = datetime.now()
+            minute0=int(now.strftime("%M"))+int(now.strftime("%S"))
+            if minute0==0:
+                #print(f"{str(datetime.now()).split('.')[0]} | Bot-snip toujours en cours d'execution : Aucune nouvelle paire : {len(perpListBase)} paires disponibles")
+                pass
+    except Exception as err :
+        print(err)
+        time.sleep(20)
+        pass
